@@ -17,3 +17,7 @@ class NotFoundError(DeenAPIError):
 class ServerError(DeenAPIError):
     """Raised when server returns 5xx error"""
     pass
+
+class InsufficientBalanceError(DeenAPIError):
+    """Raised when API key has insufficient balance to process request"""
+    pass

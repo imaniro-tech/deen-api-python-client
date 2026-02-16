@@ -1,5 +1,6 @@
 import requests
 from typing import List, Optional, Dict, Any
+from datetime import datetime
 from .models import Hadith, APIResponse
 from .exceptions import *
 
@@ -17,6 +18,8 @@ class ImaniroDeenAPIClient:
         """Handle API response and raise appropriate exceptions"""
         if response.status_code == 401:
             raise AuthenticationError("Invalid API key")
+        elif response.status_code == 402:
+            raise InsufficientBalanceError("Insufficient balance to process request")
         elif response.status_code == 404:
             raise NotFoundError("Resource not found")
         elif response.status_code == 429:
@@ -39,37 +42,73 @@ class ImaniroDeenAPIClient:
         except requests.exceptions.RequestException as e:
             raise DeenAPIError(f"Request failed: {str(e)}")  
  
-    def get_hadiths(self, book: str = '', 
-                    max_limits: int = 1, 
-                    number:str = '', 
-                    language:str = 'en', 
-                    authenticity:str = '', 
-                    keywords: List[str] = [],
-                    topics: List[str] = [],
-                    narrator:str = '',
-                    **kwargs) -> List[Hadith]:
+    def get_hadiths(
+        self, 
+        book: Optional[str] = None,
+        hadith_number: Optional[str] = None,
+        narrator: Optional[str] = None,
+        category: Optional[str] = None,
+        authenticity: Optional[str] = None,
+        language: str = "English",  # Default to English, still allows override
+        max_limit: int = 1,
+        **kwargs
+    ) -> List[Hadith]:
         """
-        Get hadiths from specified book
+        Get hadiths based on specified criteria
         
         Args:
             book: Name of the hadith book (e.g., "Sahih al-Bukhari")
-            max_limits: Maximum number of hadiths to return
+            hadith_number: Specific hadith number
+            narrator: Name of the narrator
+            category: Category or topic of the hadith (e.g., prayer, fasting)
+            authenticity: Classification of the hadith (e.g., Sahih, Daif)
+            language: Language of the hadith (default: "English")
+            max_limit: Maximum number of hadiths to return (default: 1, max: 500)
             **kwargs: Additional parameters for the API
         
         Returns:
-            List of Hadith objects
+            List of Hadith objects matching the criteria
         """
-        params = {
-            "book": book,
-            "number" : number,
-            "narrator": narrator,
-            "language": language,
-            "authenticity": authenticity,
-            "keywords": keywords,
-            "topics": topics,
-            "maxLimits": max_limits,
-            **kwargs
-        }
+        # Validate max_limit
+        if max_limit > 500:
+            raise ValueError("max_limit cannot exceed 500")
+        if max_limit < 1:
+            raise ValueError("max_limit must be at least 1")
+        
+        # Build params dictionary only with provided values
+        params = {}
+        
+        # Only add optional fields if they have non-None values
+        if book is not None:
+            params["book"] = book
+        if hadith_number is not None:
+            params["hadithNumber"] = hadith_number
+        if narrator is not None:
+            params["narrator"] = narrator
+        if category is not None:
+            params["category"] = category
+        if authenticity is not None:
+            params["authenticity"] = authenticity
+        
+        # Always include language (since it has a default) and max_limit
+        params["language"] = language
+        params["maxLimit"] = max_limit
+        
+        # Add any additional kwargs
+        params.update(kwargs)
         
         response = self._make_request("hadiths", params)
         return [Hadith.from_dict(item) for item in response.data]
+    
+    def check_status(self) -> Dict[str, Any]:
+        """Check API status"""
+        url = f"{self.base_url}/status"
+        
+        try:
+            response = self.session.get(url)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                raise DeenAPIError(f"Status check failed: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            raise DeenAPIError(f"Status check request failed: {str(e)}")

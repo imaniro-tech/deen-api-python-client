@@ -5,7 +5,7 @@ def hadith_example():
     
     try:
         # Get hadiths from Sahih al-Bukhari
-        hadiths = client.get_hadiths(book="Sahih al-Bukhari", max_limits=3)
+        hadiths = client.get_hadiths(book="Sahih al-Bukhari", hadith_number='52', max_limit=1)
         
         print("Hadiths from Sahih al-Bukhari:")
         for i, hadith in enumerate(hadiths, 1):
