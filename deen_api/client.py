@@ -17,17 +17,17 @@ class ImaniroDeenAPIClient:
     def _handle_response(self, response: requests.Response) -> Dict[str, Any]:
         """Handle API response and raise appropriate exceptions"""
         if response.status_code == 401:
-            raise AuthenticationError("Invalid API key")
+            raise AuthenticationError("Invalid API key. Please check your API key at https://deen.imaniro.com/")
         elif response.status_code == 402:
-            raise InsufficientBalanceError("Insufficient balance to process request")
+            raise InsufficientBalanceError("Insufficient balance to process request. Please top up at https://deen.imaniro.com/")
         elif response.status_code == 404:
-            raise NotFoundError("Resource not found")
+            raise NotFoundError("Resource not found. Visit https://deen.imaniro.com/ for documentation")
         elif response.status_code == 429:
-            raise RateLimitError("Rate limit exceeded")
+            raise RateLimitError("Rate limit exceeded. Check your usage at https://deen.imaniro.com/")
         elif response.status_code >= 500:
-            raise ServerError("Server error occurred")
+            raise ServerError("Server error occurred. Please check status at https://deen.imaniro.com/")
         elif response.status_code != 200:
-            raise DeenAPIError(f"API error: {response.status_code} - {response.text}")
+            raise DeenAPIError(f"API error: {response.status_code} - {response.text}. Visit https://deen.imaniro.com/ for assistance")
         
         return response.json()
     
@@ -40,8 +40,8 @@ class ImaniroDeenAPIClient:
             data = self._handle_response(response)
             return APIResponse.from_dict(data)
         except requests.exceptions.RequestException as e:
-            raise DeenAPIError(f"Request failed: {str(e)}")  
- 
+            raise DeenAPIError(f"Request failed: {str(e)}. Please check https://deen.imaniro.com/ for API status")
+    
     def get_hadiths(
         self, 
         book: Optional[str] = None,
@@ -71,7 +71,7 @@ class ImaniroDeenAPIClient:
         """
         # Validate max_limit
         if max_limit > 500:
-            raise ValueError("max_limit cannot exceed 500")
+            raise ValueError("max_limit cannot exceed 500. See API limits at https://deen.imaniro.com/")
         if max_limit < 1:
             raise ValueError("max_limit must be at least 1")
         
@@ -109,6 +109,6 @@ class ImaniroDeenAPIClient:
             if response.status_code == 200:
                 return response.json()
             else:
-                raise DeenAPIError(f"Status check failed: {response.status_code}")
+                raise DeenAPIError(f"Status check failed: {response.status_code}. Visit https://deen.imaniro.com/ for system status")
         except requests.exceptions.RequestException as e:
-            raise DeenAPIError(f"Status check request failed: {str(e)}")
+            raise DeenAPIError(f"Status check request failed: {str(e)}. Please check https://deen.imaniro.com/ for API status")
