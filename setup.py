@@ -8,10 +8,10 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="deen-api-client",
-    version="1.0.0",
+    version="1.1.0",
     author="Imaniro pvt ltd",
     author_email="info@imaniro.com",
-    description="Python client for Deen API from Imaniro.com - Islamic resources API",
+    description="Python client for Deen API from Imaniro- Access authentic hadith collections.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/imaniro-tech/deen-api-python-client",
@@ -38,9 +38,9 @@ setup(
             "pytest-cov>=2.0.0",
         ]
     },
-    keywords="islamic, api, hadith, quran, dua, muslim",
+    keywords="islamic, sunnah, bukhari, api, hadiths, quran, dua, muslim, daily hadiths",
     project_urls={
-        "Documentation": "https://github.com/imaniro-tech/deen-api-python-client",
+        "Documentation": "https://deen.imaniro.com/documentation",
         "Source": "https://github.com/imaniro-tech/deen-api-python-client",
         "Tracker": "https://github.com/imaniro-tech/deen-api-python-client/issues",
     },
